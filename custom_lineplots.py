@@ -22,7 +22,20 @@ except ImportError:
 
 # %% Presets
 def default_params():
-    """Default parameters for data visualization."""
+    """
+    Default parameters for data visualization.
+
+    Returns
+    -------
+    dict
+        A dictionary containing default rcParams values for matplotlib.
+
+    Examples
+    --------
+    >>> params = default_params()
+    >>> print(params["font.family"])
+    'DejaVu Serif'
+    """
     return {
         "font.family": "DejaVu Serif",
         "mathtext.fontset": "cm",
@@ -54,7 +67,20 @@ def default_params():
 
 
 def paper_params():
-    """Parameters for publication-quality figures."""
+    """
+    Parameters for publication-quality figures.
+
+    Returns
+    -------
+    dict
+        A dictionary containing rcParams values optimized for publication.
+
+    Examples
+    --------
+    >>> params = paper_params()
+    >>> print(params["figure.figsize"])
+    (4, 4)
+    """
     return {
         "font.family": "DejaVu Serif",
         "mathtext.fontset": "cm",
@@ -90,14 +116,35 @@ def get_custom_cycler(cmap_name=None, n_colors=9, skip_first=False, use_seaborn=
     """
     Create a custom color cycler with optional skipping of the first color.
 
-    Parameters:
-    - cmap_name (str): Name of the colormap to use.
-    - n_colors (int): Number of colors to include in the cycler.
-    - skip_first (bool): Whether to skip the first color in the colormap.
-    - use_seaborn (bool): Use Seaborn colormap if True.
+    Parameters
+    ----------
+    cmap_name : str, optional
+        Name of the colormap to use. If None, a default set of colors is used.
+    n_colors : int, default=9
+        Number of colors to include in the cycler.
+    skip_first : bool, default=False
+        Whether to skip the first color in the colormap.
+    use_seaborn : bool, default=False
+        Use a Seaborn colormap if True and Seaborn is available.
 
-    Returns:
-    - cycler: A matplotlib cycler object.
+    Returns
+    -------
+    cycler.Cycler
+        A matplotlib cycler object containing the specified colors.
+
+    Examples
+    --------
+    Use default colors:
+    >>> cycler = get_custom_cycler()
+    >>> print(cycler)
+
+    Use the "viridis" colormap with 5 colors:
+    >>> cycler = get_custom_cycler(cmap_name="viridis", n_colors=5)
+    >>> print(cycler)
+
+    Skip the first color of the "plasma" colormap:
+    >>> cycler = get_custom_cycler(cmap_name="plasma", skip_first=True)
+    >>> print(cycler)
     """
     if not cmap_name:
         colors = [
@@ -127,14 +174,27 @@ def get_custom_cycler(cmap_name=None, n_colors=9, skip_first=False, use_seaborn=
 
 def match_cycler_lengths(color_cycler, linestyles):
     """
-    Ensures the lengths of the color cycler and linestyles match.
+    Ensure the lengths of the color cycler and linestyles match.
 
-    Parameters:
-    - color_cycler (cycler): Cycler object for colors.
-    - linestyles (list): List of linestyles.
+    Parameters
+    ----------
+    color_cycler : cycler.Cycler
+        Cycler object for colors.
+    linestyles : list
+        List of linestyles.
 
-    Returns:
-    - cycler: Combined cycler with matching lengths for color and linestyle.
+    Returns
+    -------
+    cycler.Cycler
+        Combined cycler with matching lengths for color and linestyle.
+
+    Examples
+    --------
+    >>> from cycler import cycler
+    >>> colors = cycler(color=["r", "g", "b"])
+    >>> linestyles = ["solid", "dotted"]
+    >>> combined = match_cycler_lengths(colors, linestyles)
+    >>> print(combined)
     """
     # Extract colors from the color cycler
     colors = [c["color"] for c in color_cycler]
@@ -164,19 +224,45 @@ def get_rc_params(
     """
     Generate or update rcParams based on a preset and additional options.
 
-    Parameters:
-    - preset (str): Preset to use ('default_params' or 'paper_params').
-    - font (str): Font family to use (e.g., 'Times New Roman').
-    - thin_border (bool): Use thinner borders if True.
-    - linestyle_cycle (bool): Whether to include a linestyle cycler. 
-    Nice when just wanting to use default. Can also set manually in custom_plot
-    - custom_cycler (cycler): Predefined color cycler (used for colors).
-    - custom_linestyles (list): Custom linestyle cycle (used if linestyle_cycle=True).
-    - update_existing (bool): Update global rcParams if True.
+    Parameters
+    ----------
+    preset : str, default='default_params'
+        Preset to use ('default_params' or 'paper_params').
+    font : str, default='DejaVu Serif'
+        Font family to use (e.g., 'Times New Roman').
+    thin_border : bool, default=False
+        Use thinner borders if True.
+    linestyle_cycle : bool, optional
+        Whether to include a linestyle cycler.
+    custom_cycler : cycler.Cycler, optional
+        Predefined color cycler (used for colors).
+    custom_linestyles : list, optional
+        Custom linestyle cycle (used if linestyle_cycle=True).
+    update_existing : bool, default=False
+        Update global rcParams if True.
 
-    Returns:
-    - dict: Updated rcParams dictionary.
+    Returns
+    -------
+    dict
+        Updated rcParams dictionary.
+
+    Examples
+    --------
+    Use default parameters:
+    >>> params = get_rc_params()
+    >>> print(params["font.family"])
+    'DejaVu Serif'
+
+    Use paper parameters with a custom color cycler:
+    >>> from cycler import cycler
+    >>> custom_cycler = cycler(color=["r", "g", "b"])
+    >>> params = get_rc_params(
+    ...     preset="paper_params",
+    ...     custom_cycler=custom_cycler,
+    ... )
+    >>> print(params["axes.prop_cycle"])
     """
+    
     presets = {
         "default_params": default_params(),
         "paper_params": paper_params(),
@@ -264,37 +350,74 @@ def custom_plot(
     """
     Plot multiple lines with customizable parameters.
 
-    Parameters:
-    - x (array-like): X-axis data.
-    - y_list (list of array-like): List of Y-axis data for each line.
-    - labels (list of str, optional): Labels for the legend.
-    - xlabel (str, optional): Label for the X-axis.
-    - ylabel (str, optional): Label for the Y-axis.
-    - title (str, optional): Title of the plot.
-    - xlim (tuple, optional): X-axis limits (min, max).
-    - ylim (tuple, optional): Y-axis limits (min, max).
-    - grid (bool, optional): Whether to show grid lines.
-    - aspect (str or float, optional): Aspect ratio of the plot.
-    - savefig (str, optional): Filename for saving the plot (excluding extension).
-    - rc_params (dict, optional): Global rcParams to update.
-    - local_rc_params (dict, optional): Temporary rcParams for this plot.
-    - save_formats (list of str, optional): File formats to save the plot (e.g., ['png', 'pdf']).
-    - show (bool, optional): Whether to display the plot.
-    - title_fontsize (int, optional): Font size for the title.
-    - title_pad (float, optional): Padding between the title and the plot.
-    - x_major_locator (float, optional): Major tick interval for the X-axis.
-    - y_major_locator (float, optional): Major tick interval for the Y-axis.
-    - xscale (str, optional): Scale for the X-axis ('linear', 'log', etc.).
-    - yscale (str, optional): Scale for the Y-axis ('linear', 'log', etc.).
-    - xticks (array-like, optional): Custom X-tick positions.
-    - xtick_labels (list of str, optional): Custom labels for X-ticks.
-    - yticks (array-like, optional): Custom Y-tick positions.
-    - ytick_labels (list of str, optional): Custom labels for Y-ticks.
-    - linestyle_dict (dict, optional): Line-specific customizations (e.g., colors, markers).
-    - **plot_kwargs: Additional arguments passed to `plt.plot`.
+    Parameters
+    ----------
+    x : array-like
+        X-axis data.
+    y_list : list of array-like
+        List of Y-axis data for each line.
+    labels : list of str, optional
+        Labels for the legend.
+    xlabel : str, optional
+        Label for the X-axis.
+    ylabel : str, optional
+        Label for the Y-axis.
+    title : str, optional
+        Title of the plot.
+    xlim : tuple, optional
+        X-axis limits (min, max).
+    ylim : tuple, optional
+        Y-axis limits (min, max).
+    grid : bool, default=True
+        Whether to show grid lines.
+    aspect : str or float, default='auto'
+        Aspect ratio of the plot.
+    savefig : str, optional
+        Filename for saving the plot (excluding extension).
+    rc_params : dict, optional
+        Global rcParams to update.
+    local_rc_params : dict, optional
+        Temporary rcParams for this plot.
+    save_formats : list of str, optional
+        File formats to save the plot (e.g., ['png', 'pdf']).
+    show : bool, default=True
+        Whether to display the plot.
+    title_fontsize : int, default=16
+        Font size for the title.
+    title_pad : float, default=10
+        Padding between the title and the plot.
+    x_major_locator : float, optional
+        Major tick interval for the X-axis.
+    y_major_locator : float, optional
+        Major tick interval for the Y-axis.
+    xscale : str, default='linear'
+        Scale for the X-axis ('linear', 'log', etc.).
+    yscale : str, default='linear'
+        Scale for the Y-axis ('linear', 'log', etc.).
+    xticks : array-like, optional
+        Custom X-tick positions.
+    xtick_labels : list of str, optional
+        Custom labels for X-ticks.
+    yticks : array-like, optional
+        Custom Y-tick positions.
+    ytick_labels : list of str, optional
+        Custom labels for Y-ticks.
+    linestyle_dict : dict, optional
+        Line-specific customizations (e.g., colors, markers).
+    **plot_kwargs : Additional arguments
+        Additional arguments passed to `plt.plot`.
 
-    Returns:
-    - None
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> x = np.linspace(0, 10, 100)
+    >>> y_list = [np.sin(x + i) for i in range(3)]
+    >>> labels = ["sin(x)", "sin(x+1)", "sin(x+2)"]
+    >>> custom_plot(x, y_list, labels=labels, xlabel="X", ylabel="Y")
     """
     # Update global rcParams if provided
     if rc_params:
@@ -389,34 +512,67 @@ def _plot(
     **plot_kwargs,
 ):
     """
-    Internal function to handle the actual plotting logic.
+   Internal function to handle the actual plotting logic.
 
-    Parameters:
-    - ax (matplotlib.axes.Axes): Axes object for the plot.
-    - x (array-like): X-axis data.
-    - y_list (list of array-like): List of Y-axis data for each line.
-    - labels (list of str, optional): Labels for the legend.
-    - xlabel (str, optional): Label for the X-axis.
-    - ylabel (str, optional): Label for the Y-axis.
-    - title (str, optional): Title of the plot.
-    - xlim (tuple, optional): X-axis limits (min, max).
-    - ylim (tuple, optional): Y-axis limits (min, max).
-    - grid (bool, optional): Whether to show grid lines.
-    - aspect (str or float, optional): Aspect ratio of the plot.
-    - xticks (array-like, optional): Custom X-tick positions.
-    - xtick_labels (list of str, optional): Custom labels for X-ticks.
-    - yticks (array-like, optional): Custom Y-tick positions.
-    - ytick_labels (list of str, optional): Custom labels for Y-ticks.
-    - xscale (str, optional): Scale for the X-axis ('linear', 'log', etc.).
-    - yscale (str, optional): Scale for the Y-axis ('linear', 'log', etc.).
-    - linestyle_dict (dict, optional): Line-specific customizations.
-    - title_fontsize (int, optional): Font size for the title.
-    - title_pad (float, optional): Padding between the title and the plot.
-    - **plot_kwargs: Additional arguments passed to `plt.plot`.
+   Parameters
+   ----------
+   ax : matplotlib.axes.Axes
+       Axes object for the plot.
+   x : array-like
+       X-axis data.
+   y_list : list of array-like
+       List of Y-axis data for each line.
+   labels : list of str, optional
+       Labels for the legend.
+   xlabel : str, optional
+       Label for the X-axis.
+   ylabel : str, optional
+       Label for the Y-axis.
+   title : str, optional
+       Title of the plot.
+   xlim : tuple, optional
+       X-axis limits (min, max).
+   ylim : tuple, optional
+       Y-axis limits (min, max).
+   grid : bool, default=True
+       Whether to show grid lines.
+   aspect : str or float, optional
+       Aspect ratio of the plot.
+   xticks : array-like, optional
+       Custom X-tick positions.
+   xtick_labels : list of str, optional
+       Custom labels for X-ticks.
+   yticks : array-like, optional
+       Custom Y-tick positions.
+   ytick_labels : list of str, optional
+       Custom labels for Y-ticks.
+   xscale : str, default='linear'
+       Scale for the X-axis ('linear', 'log', etc.).
+   yscale : str, default='linear'
+       Scale for the Y-axis ('linear', 'log', etc.).
+   linestyle_dict : dict, optional
+       Line-specific customizations.
+   title_fontsize : int, default=16
+       Font size for the title.
+   title_pad : float, default=10
+       Padding between the title and the plot.
+   **plot_kwargs : Additional arguments
+       Additional arguments passed to `plt.plot`.
 
-    Returns:
-    - None
-    """
+   Returns
+   -------
+   None
+
+   Examples
+   --------
+   >>> import matplotlib.pyplot as plt
+   >>> import numpy as np
+   >>> fig, ax = plt.subplots()
+   >>> x = np.linspace(0, 10, 100)
+   >>> y_list = [np.sin(x), np.cos(x)]
+   >>> labels = ["sin(x)", "cos(x)"]
+   >>> _plot(ax, x, y_list, labels, "X", "Y", "Sine and Cosine", None, None, True, "auto", None, None, None, None)
+   """
     for i, y in enumerate(y_list):
         # Start with global plot_kwargs
         line_kwargs = plot_kwargs.copy()
